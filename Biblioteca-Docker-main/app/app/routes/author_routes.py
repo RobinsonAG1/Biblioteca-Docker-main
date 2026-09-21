@@ -9,11 +9,16 @@ def index():
     authors = Author.query.all()   
     return render_template('authors/index.html', data=authors)
 
+from jinja2.exceptions import TemplateNotFound
+
 @bp.route('/list/<int:id>', methods=['GET', 'POST'])
 def list(id):
     author = Author.query.get_or_404(id)
     books = author.books
-    return render_template('authors/list.html', books=books)
+    try:
+        return render_template('authors/list.html', books=books)
+    except TemplateNotFound:
+        return render_template('authors/List.html', books=books)
 
 @bp.route('/add', methods=['GET', 'POST'])
 def add():
