@@ -1,0 +1,48 @@
+name: Python Tests
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: '**/requirements.txt'
+
+      - name: Install system dependencies (libzbar)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libzbar0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f Biblioteca-Docker-main/app/requirements.txt ]; then
+            pip install -r Biblioteca-Docker-main/app/requirements.txt
+          elif [ -f app/requirements.txt ]; then
+            pip install -r app/requirements.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run Pytest
+        run: |
+          if [ -d Biblioteca-Docker-main/app ]; then
+            cd Biblioteca-Docker-main/app
+          elif [ -d app ]; then
+            cd app
+          fi
+          python -m pytest -v
